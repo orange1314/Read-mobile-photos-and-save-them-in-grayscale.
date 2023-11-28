@@ -76,15 +76,15 @@
 ## MainActivity.java
 
 ```
+
 // 包名
-// 包名
-package com.example.opencv;
+        package com.example.sementation;
 
 // Android 相關的 imports
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -92,16 +92,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-// OpenCV 相關的 imports
-import com.example.readphotosandapplyopencv.R;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-// Java I/O 相關的 imports
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -120,9 +114,6 @@ public class MainActivity extends Activity {
 
     // 用於保存原始圖像的 Bitmap
     private Bitmap originalBitmap;
-
-    // 表示是否處於灰度狀態的布林變數
-    private boolean isGray = false;
 
     // OpenCV 初始化
     static {
@@ -181,7 +172,10 @@ public class MainActivity extends Activity {
                 Bitmap selectedImage = MediaStore.Images.Media.getBitmap(
                         this.getContentResolver(), data.getData());
                 originalBitmap = selectedImage;
+                // 顯示新選擇的照片
                 imageViewOriginal.setImageBitmap(originalBitmap);
+                imageViewOriginal.setVisibility(View.VISIBLE);
+                imageViewProcessed.setVisibility(View.GONE);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -205,6 +199,7 @@ public class MainActivity extends Activity {
         saveImageToGallery(processedBitmap, "grey");
 
         // 顯示處理後的灰度圖像
+        Object Bitmap = null;
         imageViewProcessed.setImageBitmap(processedBitmap);
         imageViewProcessed.setVisibility(View.VISIBLE);
         imageViewOriginal.setVisibility(View.GONE);
@@ -238,8 +233,6 @@ public class MainActivity extends Activity {
     }
 }
 
-
-   
 ```
 
 
@@ -254,59 +247,121 @@ public class MainActivity extends Activity {
 
 ## 程式碼解析
 
-### OpenCV 初始化
+這是一個 Android 應用程式的程式碼，使用了 OpenCV 和 Android 元件，主要功能是打開相簿選擇照片，並對所選擇的照片進行處理。下面是程式碼的主要解析：
 
-```java
-static {
-    if (!OpenCVLoader.initDebug()) {
-        Log.e("OpenCV", "OpenCV initialization failed.");
-    } else {
-        Log.d("OpenCV", "OpenCV initialization succeeded.");
-    }
-}
-```
-這個靜態區塊確保 OpenCV 函式庫在應用程式啟動時被正確初始化。
+1. **Imports:**
+   ```java
+   import android.app.Activity;
+   import android.content.Intent;
+   import android.graphics.Bitmap;
+   import android.os.Bundle;
+   import android.provider.MediaStore;
+   import android.util.Log;
+   import android.view.View;
+   import android.widget.Button;
+   import android.widget.ImageView;
+   
+   import org.opencv.android.OpenCVLoader;
+   import org.opencv.core.Mat;
+   import org.opencv.imgproc.Imgproc;
+   
+   import java.io.File;
+   import java.io.FileOutputStream;
+   import java.io.IOException;
+   ```
 
-### 主活動 (`MainActivity`)
-```
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    // ... （略）
-    // 初始化視圖元件和按鈕點擊監聽器
-    // ... （略）
-}
+   這裡是導入所需的 Android 和 OpenCV 相關的類別。
 
-// 打開相簿的方法
-private void openGallery() {
-    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-    startActivityForResult(intent, REQUEST_OPEN_GALLERY);
-}
+2. **Activity Class:**
+   ```java
+   public class MainActivity extends Activity {
+   ```
 
-// 處理返回結果的回調方法
-@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    // ... （略）
-    // 從相簿中選擇照片後，將其設置為原始圖像
-    // ... （略）
-}
+   這是主活動類別，它擴展了 Android 的 `Activity` 類別。
 
-// 處理圖像的方法
-private void processImage(Bitmap originalBitmap) {
-    // ... （略）
-    // 將原始圖像轉換成灰度圖像，然後保存並顯示
-    // ... （略）
-}
+3. **靜態區塊 (Static Block):**
+   ```java
+   static {
+       if (!OpenCVLoader.initDebug()) {
+           Log.e("OpenCV", "OpenCV initialization failed.");
+       } else {
+           Log.d("OpenCV", "OpenCV initialization succeeded.");
+       }
+   }
+   ```
 
-// 保存圖像到文件的方法
-private void saveImageToGallery(Bitmap bitmap, String suffix) {
-    // ... （略）
-    // 將處理後的灰度圖像保存到相簿
-    // ... （略）
-}
-```
-這部分程式碼負責初始化視圖元件、設置按鈕點擊監聽器，以及實現打開相簿、處理圖像和保存圖像的相應方法。
+   這是一個靜態區塊，用於初始化 OpenCV。它檢查 OpenCV 是否成功初始化，並在 Log 中記錄結果。
 
-整個應用程式的核心邏輯在於 processImage 方法中，它使用 OpenCV 函式庫將原始照片轉換為灰度照片，然後將處理後的照片保存到相簿。
+4. **成員變數 (Member Variables):**
+   ```java
+   private static final int REQUEST_OPEN_GALLERY = 1;
+   private ImageView imageViewOriginal, imageViewProcessed;
+   private Button btnProcess, btnOpenGallery;
+   private Bitmap originalBitmap;
+   private boolean isGray = false;
+   ```
+
+   這裡定義了一些成員變數，包括相簿請求碼、兩個 `ImageView` 用於顯示原始和處理後的圖像、兩個按鈕用於處理圖像和打開相簿。
+
+5. **onCreate 方法:**
+   ```java
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_main);
+       // 初始化視圖元件
+       // 設置按鈕點擊監聽器
+   }
+   ```
+
+   `onCreate` 方法是活動創建時的回調方法。在這裡，它設置了活動的佈局，初始化了視圖元件，並設置了按鈕的點擊監聽器。
+
+6. **openGallery 方法:**
+   ```java
+   private void openGallery() {
+       Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+       startActivityForResult(intent, REQUEST_OPEN_GALLERY);
+   }
+   ```
+
+   這是打開相簿的方法，使用 `Intent` 來啟動相簿選擇照片的活動。
+
+7. **onActivityResult 方法:**
+   ```java
+   @Override
+   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+       // 處理返回結果
+   }
+   ```
+
+   `onActivityResult` 方法處理打開相簿活動的返回結果。如果成功選擇了照片，則將其設置為原始圖像。
+
+8. **processImage 方法:**
+   ```java
+   private void processImage(Bitmap originalBitmap) {
+       // 處理圖像的方法
+   }
+   ```
+
+   這是處理圖像的方法，將原始圖像轉換為灰度圖像並保存。
+
+9. **saveImageToGallery 方法:**
+   ```java
+   private void saveImageToGallery(Bitmap bitmap, String suffix) {
+       // 保存圖像到文件的方法
+   }
+   ```
+
+   這是將處理後的圖像保存到相簿的方法。
+
+10. **完整的程式碼:**
+    ```java
+    // 程式碼的其餘部分，包括打開相簿的按鈕點擊監聽器和其他方法的實
+
+現。
+    ```
+
+   完整的程式碼包括處理按鈕點擊事件、處理圖像的邏輯以及保存圖像的方法。這個程式碼基於 Android 平台，使用了 OpenCV 函式庫來處理圖像。
 
 ## AndroidManifest.xml
 
